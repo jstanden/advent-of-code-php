@@ -63,13 +63,13 @@ function sensorRangesAtTargetAxis(string $axis, int $target, $min=PHP_INT_MIN, $
 	global $sensors;
 	
 	if(!in_array($axis, ['x', 'y']))
-		die("sensorRangesAtTargetAxis() axis must be 'x' or 'y'");
+		return [];
 	
 	$ranges = [];
 	$inverse_axis = $axis == 'x' ? 'y' : 'x';
 	
 	foreach($sensors as $sensor) {
-		// Quickly exclude values outside of our radius
+		// Quickly avoid sensors outside our radius
 		if($target < $sensor['extents'][$axis][0] || $target > $sensor['extents'][$axis][1])
 			continue;
 
@@ -85,15 +85,14 @@ function sensorRangesAtTargetAxis(string $axis, int $target, $min=PHP_INT_MIN, $
 		$axis_min = $sensor[$inverse_axis]-$range;
 		$axis_max = $sensor[$inverse_axis]+$range;
 
+		// Skip if we're outside the bounding box
 		if($axis_min > $max || $axis_max < $min)
 			continue;
 
 		// Mark our sensor radius overlap in this y band
-		$axis_range = [
-			max($min, $sensor[$inverse_axis]-$range),
-			min($max, $sensor[$inverse_axis]+$range)
-		];
+		$axis_range = [max($min, $axis_min), min($max, $axis_max)];
 
+		// Add this range to the list
 		$ranges[] = $axis_range;
 	}
 	
