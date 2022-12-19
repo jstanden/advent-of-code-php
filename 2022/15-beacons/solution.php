@@ -73,10 +73,6 @@ function sensorRangesAtTargetAxis(string $axis, int $target, $min=PHP_INT_MIN, $
 		if($target < $sensor['extents'][$axis][0] || $target > $sensor['extents'][$axis][1])
 			continue;
 
-		// Block out known beacons
-		if($target == $sensor['beacon_' . $axis])
-			$ranges[] = [$sensor['beacon_' . $inverse_axis], $sensor['beacon_' . $inverse_axis]];
-
 		// Straight line x distance from our sensor to the target
 		$target_dist = abs($sensor[$axis] - $target);
 
