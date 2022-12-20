@@ -239,6 +239,10 @@ class Chamber {
         while(array_sum($this->_grid[$y] ?? [])) $y++;
         return $y;
     }
+		
+		public function getChamberRow(int $y) : array {
+			return $this->_grid[$y];
+		}
 
     public function getRockCount() : int {
         return $this->_rocksDropped;
@@ -254,10 +258,11 @@ $move_sequence_len = strlen($move_sequence);
 
 $rock = $chamber->nextRock();
 
-$until_rock = 2022;
-//$until_rock = 1_000_000_000_000;
+$until_rock = 2_022;
 
 $chamber->renderFrame();
+//$last_move = 0;
+//$last_height = 0;
 
 while(true) {
     $d = $move_sequence[$move_counter % $move_sequence_len];
@@ -267,15 +272,22 @@ while(true) {
     $chamber->renderFrame();
 
     if(!$chamber->move($rock, Direction::DOWN)) {
-        if(0 == $chamber->getRockCount() % 10_000)
-            $chamber->renderFrame();
+			
+			$tower_height = $chamber->getRockLineHeight();
+			$top_row = $chamber->getChamberRow($tower_height-1);
+			
+//			if($rock->type == RockType::SQUARE) {
+//				printf("Rock: %d Shape: %s Height: %d (%d) Moves: %d (%d)\n", $chamber->getRockCount(), $rock->type->name, $tower_height, $tower_height-$last_height, $move_counter, $move_counter-$last_move);
+//				$last_move = $move_counter;
+//				$last_height = $tower_height;
+//			}
 
-        if($chamber->getRockCount() == $until_rock) {
-            echo "Part 1: ", $chamber->getRockLineHeight(), PHP_EOL;
-            break;
-        }
+			if($chamber->getRockCount() == $until_rock) {
+					echo "Part 1: ", $tower_height, PHP_EOL;
+					break;
+			}
 
-        $rock = $chamber->nextRock();
+			$rock = $chamber->nextRock();
     }
 
     $chamber->renderFrame();
