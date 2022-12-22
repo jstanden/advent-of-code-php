@@ -2,7 +2,7 @@
 // Jeff Standen <https://phpc.social/@jeff>
 declare(strict_types=1);
 
-namespace AoC\Year2022\Day19\Part1;
+namespace AoC\Year2022\Day19\Part2;
 
 use Exception;
 
@@ -23,30 +23,43 @@ class ResourceAmount {
 		$this->geode = $geode;
 	}
 	
-	public function canAfford(int $ore=0, int $clay=0, int $obsidian=0, int $geode=0) : bool {
-		return $this->ore >= $ore 
-			&& $this->clay >= $clay 
-			&& $this->obsidian >= $obsidian 
-			&& $this->geode >= $geode
-		;
+	// Can this stack afford the given amount
+	public function canAfford(ResourceAmount $amount) : bool {
+		return $this->ore >= $amount->ore
+			&& $this->clay >= $amount->clay
+			&& $this->obsidian >= $amount->obsidian
+			&& $this->geode >= $amount->geode
+			;
 	}
 	
-	public function credit(int $ore=0, int $clay=0, int $obsidian=0, int $geode=0) : bool {
-		$this->ore += $ore;
-		$this->clay += $clay;
-		$this->obsidian += $obsidian;
-		$this->geode += $geode;
+	// Do these stacks intersect on resource types
+	public function atLeastOneOfEach(ResourceAmount $amount) : bool {
+		// Check most advanced first
+		if(($amount->geode && !$this->geode)
+			|| ($amount->obsidian && !$this->obsidian)
+			|| ($amount->clay && !$this->clay)
+			|| ($amount->ore && !$this->ore))
+			return false;
+		
 		return true;
 	}
 	
-	public function debit(int $ore=0, int $clay=0, int $obsidian=0, int $geode=0) : bool {
-		if(!$this->canAfford($ore, $clay, $obsidian, $geode))
+	public function credit(ResourceAmount $amount) : bool {
+		$this->ore += $amount->ore;
+		$this->clay += $amount->clay;
+		$this->obsidian += $amount->obsidian;
+		$this->geode += $amount->geode;
+		return true;
+	}
+	
+	public function debit(ResourceAmount $amount) : bool {
+		if(!$this->canAfford($amount))
 			return false;
 		
-		$this->ore -= $ore;
-		$this->clay -= $clay;
-		$this->obsidian -= $obsidian;
-		$this->geode -= $geode;
+		$this->ore -= $amount->ore;
+		$this->clay -= $amount->clay;
+		$this->obsidian -= $amount->obsidian;
+		$this->geode -= $amount->geode;
 		return true;
 	}
 	
@@ -62,6 +75,7 @@ class Blueprint {
 	public ResourceAmount $clayRobotCost;
 	public ResourceAmount $obsidianRobotCost;
 	public ResourceAmount $geodeRobotCost;
+	public int $highestOreCost;
 	
 	/* @throws Exception */
 	public function __construct(string $schematic) {
@@ -71,10 +85,17 @@ class Blueprint {
 			throw new Exception(("Invalid blueprint input."));
 		
 		$this->id = $numbers[0];
+		
 		$this->oreRobotCost = new ResourceAmount($numbers[1]);
 		$this->clayRobotCost = new ResourceAmount($numbers[2]);
 		$this->obsidianRobotCost = new ResourceAmount($numbers[3], $numbers[4]);
 		$this->geodeRobotCost = new ResourceAmount($numbers[5], 0, $numbers[6]);
+		
+		$this->highestOreCost = max(
+			$this->geodeRobotCost->ore,
+			$this->obsidianRobotCost->ore,
+			$this->clayRobotCost->ore
+		);
 	}
 	
 	// We can just extract numbers per line and ignore the text
@@ -94,11 +115,11 @@ class GameState {
 	public ResourceAmount $resources;
 	public array $actionsTaken;
 	
-	public const ACTION_DO_NOTHING = 0; 
-	public const ACTION_BUILD_ORE = 1; 
-	public const ACTION_BUILD_CLAY = 2; 
-	public const ACTION_BUILD_OBSIDIAN = 3; 
-	public const ACTION_BUILD_GEODE = 4; 
+	public const ACTION_DO_NOTHING = 0;
+	public const ACTION_BUILD_ORE = 1;
+	public const ACTION_BUILD_CLAY = 2;
+	public const ACTION_BUILD_OBSIDIAN = 3;
+	public const ACTION_BUILD_GEODE = 4;
 	
 	public function __construct(Blueprint $blueprint, $timeRemaining=24) {
 		$this->blueprint = $blueprint;
@@ -120,15 +141,22 @@ class GameState {
 		
 		// If we have the prerequisite robot types, at what point can we build
 		// the next geode robot?
-		if($this->robots->canAfford(1, 0, 1)) {
+		if($this->robots->atLeastOneOfEach($this->blueprint->geodeRobotCost)) {
+			
+			// Extrapolate our resources at that future minute
 			$futureResources = clone $this->resources;
 			$time = 0;
-			while(!$futureResources->canAfford(...$this->blueprint->geodeRobotCost->toArray())) {
-				$futureResources->credit(...$this->robots->toArray());
+			
+			// Wait minutes until we can afford it
+			while(!$futureResources->canAfford($this->blueprint->geodeRobotCost)) {
+				$futureResources->credit($this->robots);
 				$time++;
 			}
+			
+			// Return how long we waited and what resources we produced
 			if($this->timeRemaining - $time > 0) {
-				$futureResources->debit(...$this->resources->toArray());
+				// Delta (less starting resources)
+				$futureResources->debit($this->resources);
 				$possibleBuilds[] = [$time, self::ACTION_BUILD_GEODE, $futureResources];
 			}
 		}
@@ -136,15 +164,19 @@ class GameState {
 		// If we have the prerequisite robot types, at what point can we build
 		// the next obsidian robot? Stop building them if we produce more obsidian
 		// per turn than a geode robot costs.
-		if($this->robots->canAfford(1, 1) && $this->blueprint->geodeRobotCost->obsidian > $this->robots->obsidian) {
+		if($this->robots->atLeastOneOfEach($this->blueprint->obsidianRobotCost) 
+			&& $this->blueprint->geodeRobotCost->obsidian > $this->robots->obsidian) {
+			
 			$futureResources = clone $this->resources;
 			$time = 0;
-			while(!$futureResources->canAfford(...$this->blueprint->obsidianRobotCost->toArray())) {
-				$futureResources->credit(...$this->robots->toArray());
+			
+			while(!$futureResources->canAfford($this->blueprint->obsidianRobotCost)) {
+				$futureResources->credit($this->robots);
 				$time++;
 			}
+			
 			if($this->timeRemaining - $time > 0) {
-				$futureResources->debit(...$this->resources->toArray());
+				$futureResources->debit($this->resources);
 				$possibleBuilds[] = [$time, self::ACTION_BUILD_OBSIDIAN, $futureResources];
 			}
 		}
@@ -152,15 +184,19 @@ class GameState {
 		// If we have the prerequisite robot types, at what point can we build
 		// the next clay robot? Stop building them if we produce more clay
 		// per turn than an obsidian robot costs.
-		if($this->robots->canAfford(1) && $this->blueprint->obsidianRobotCost->clay > $this->robots->clay) {
+		if($this->robots->atLeastOneOfEach($this->blueprint->clayRobotCost) 
+			&& $this->blueprint->obsidianRobotCost->clay > $this->robots->clay) {
+			
 			$futureResources = clone $this->resources;
 			$time = 0;
-			while(!$futureResources->canAfford(...$this->blueprint->clayRobotCost->toArray())) {
-				$futureResources->credit(...$this->robots->toArray());
+			
+			while(!$futureResources->canAfford($this->blueprint->clayRobotCost)) {
+				$futureResources->credit($this->robots);
 				$time++;
 			}
+			
 			if($this->timeRemaining - $time > 0) {
-				$futureResources->debit(...$this->resources->toArray());
+				$futureResources->debit($this->resources);
 				$possibleBuilds[] = [$time, self::ACTION_BUILD_CLAY, $futureResources];
 			}
 		}
@@ -168,15 +204,19 @@ class GameState {
 		// If we have the prerequisite robot types, at what point can we build
 		// the next ore robot? Stop building them if we produce more ore
 		// per turn than the MAX cost of a geode/obsidian/clay robot.
-		if($this->robots->canAfford(1) && max($this->blueprint->geodeRobotCost->ore, $this->blueprint->obsidianRobotCost->ore, $this->blueprint->clayRobotCost->ore) > $this->robots->ore) {
+		if($this->robots->atLeastOneOfEach($this->blueprint->oreRobotCost) 
+			&& $this->blueprint->highestOreCost > $this->robots->ore) {
+			
 			$futureResources = clone $this->resources;
 			$time = 0;
-			while(!$futureResources->canAfford(...$this->blueprint->oreRobotCost->toArray())) {
-				$futureResources->credit(...$this->robots->toArray());
+			
+			while(!$futureResources->canAfford($this->blueprint->oreRobotCost)) {
+				$futureResources->credit($this->robots);
 				$time++;
 			}
+			
 			if($this->timeRemaining - $time > 0) {
-				$futureResources->debit(...$this->resources->toArray());
+				$futureResources->debit($this->resources);
 				$possibleBuilds[] = [$time, self::ACTION_BUILD_ORE, $futureResources];
 			}
 		}
@@ -191,19 +231,19 @@ class GameState {
 		$produced = new ResourceAmount();
 		
 		if ($action == self::ACTION_BUILD_ORE) {
-			$this->resources->debit(...$this->blueprint->oreRobotCost->toArray());
+			$this->resources->debit($this->blueprint->oreRobotCost);
 			$produced->ore++;
 			
 		} elseif ($action == self::ACTION_BUILD_CLAY) {
-			$this->resources->debit(...$this->blueprint->clayRobotCost->toArray());
+			$this->resources->debit($this->blueprint->clayRobotCost);
 			$produced->clay++;
 			
 		} elseif ($action == self::ACTION_BUILD_OBSIDIAN) {
-			$this->resources->debit(...$this->blueprint->obsidianRobotCost->toArray());
+			$this->resources->debit($this->blueprint->obsidianRobotCost);
 			$produced->obsidian++;
 			
 		} elseif ($action == self::ACTION_BUILD_GEODE) {
-			$this->resources->debit(...$this->blueprint->geodeRobotCost->toArray());
+			$this->resources->debit($this->blueprint->geodeRobotCost);
 			$produced->geode++;
 		}
 		
@@ -212,7 +252,7 @@ class GameState {
 	
 	// Robots produce resources for a minute's turn
 	public function produceResources() : void {
-		$this->resources->credit(...$this->robots->toArray());
+		$this->resources->credit($this->robots);
 	}
 }
 
@@ -225,13 +265,18 @@ class Planner {
 		$max_geodes = [];
 		
 		foreach($blueprints as $blueprint) {
+			// Create a new game state for this simulation
 			$game_state = new GameState($blueprint, $time_remaining);
+			
+			// Track the best outcome so far
 			$best_outcome = clone $game_state;
+			
+			// Run the simulation
 			$this->_simulateGameRound($game_state, $best_outcome);
 			
 			$max_geodes[$blueprint->id] = $best_outcome->resources->geode;
 			
-			printf("Blueprint %d best game: %s | %s | %s\n",
+			printf("FINAL Blueprint %d best game: %s | %s | %s\n",
 				$blueprint->id,
 				implode(',', $best_outcome->actionsTaken),
 				implode(',', $best_outcome->resources->toArray()),
@@ -242,15 +287,42 @@ class Planner {
 		return $max_geodes;
 	}
 	
+	private function _predictBestCaseGeodes(GameState $state) : int {
+		$predicted = clone $state;
+		
+		// What if we build a geode robot on all future turns
+		while($predicted->timeRemaining > 0) {
+			$predicted->resources->geode += $predicted->robots->geode++;
+			$predicted->timeRemaining--;
+		}
+		
+		return $predicted->resources->geode;
+	}
+	
 	// Advance a game state to the next state
 	private function _simulateGameRound(GameState $state, GameState &$best_outcome) : void {
 		// If we run out of time, compare to our best result
 		if($state->timeRemaining <= 0) {
 			$this->simulationsCount++;
 			
+//			printf("GAME END Blueprint %d: %s | %s | %s\n",
+//				$state->blueprint->id,
+//				implode(',', $state->actionsTaken),
+//				implode(',', $state->resources->toArray()),
+//				implode(',', $state->robots->toArray()),
+//			);
+			
 			// We only care about the most cracked geodes
-			if($state->resources->geode > $best_outcome->resources->geode)
+			if($state->resources->geode > $best_outcome->resources->geode) {
 				$best_outcome = clone $state;
+				
+				printf("UPDATE Blueprint %d best game: %s | %s | %s\n",
+					$best_outcome->blueprint->id,
+					implode(',', $best_outcome->actionsTaken),
+					implode(',', $best_outcome->resources->toArray()),
+					implode(',', $best_outcome->robots->toArray()),
+				);
+			}
 			
 			return;
 		}
@@ -259,7 +331,7 @@ class Planner {
 		$next_actions = $state->nextPossibleBuilds();
 		
 		// If we have no possible moves, credit remaining resource production and end
-		if(empty($next_actions)) {
+		if(!$next_actions) {
 			while($state->timeRemaining) {
 				$state->produceResources();
 				$state->actionsTaken[] = $state::ACTION_DO_NOTHING;
@@ -280,11 +352,20 @@ class Planner {
 				$new_state->timeRemaining--;
 			}
 			
-			// Build the robot and finish this minute's turn
+			// Perform the action but credit a new robot after production
 			$produced = $new_state->performAction($action[1]);
+			// Produce resources for the turn
 			$new_state->produceResources();
-			$new_state->robots->credit(...$produced->toArray());
+			// Build new robots after we produce resources
+			$new_state->robots->credit($produced);
+			// One more minute down
 			$new_state->timeRemaining--;
+			
+			// If we can't possibly best the best from here, abort
+			if(($predicted_geodes = $this->_predictBestCaseGeodes($state)) < $best_outcome->resources->geode) {
+				//printf("Aborting a failing strategy (%d < %d) %s\n", $predicted_geodes, $best_outcome->resources->geode, implode(',', $state->actionsTaken));
+				return;
+			}
 			
 			// Recurse
 			$this->_simulateGameRound($new_state, $best_outcome);
@@ -295,12 +376,22 @@ class Planner {
 try {
 //	$data = explode("\n", file_get_contents("test.txt"));
 	$data = explode("\n", file_get_contents("data.txt"));
-	
 	$planner = new Planner();
-	$blueprint_max_geodes = $planner->simulate($data, 24);
 	
-	printf("Part 1: %d\n", 
-		array_sum(array_map(fn($id) => $id * $blueprint_max_geodes[$id], array_keys($blueprint_max_geodes)))
+	$time_limit = 24;
+	$blueprint_limit = PHP_INT_MAX;
+	$part1_results = $planner->simulate(array_slice($data, 0, $blueprint_limit), $time_limit);
+	
+	$time_limit = 32;
+	$blueprint_limit = 3;
+	$part2_results = $planner->simulate(array_slice($data, 0, $blueprint_limit), $time_limit);
+	
+	printf("Part 1: %d\n",
+		array_sum(array_map(fn($id) => $id * $part1_results[$id], array_keys($part1_results)))
+	);
+	
+	printf("Part 2: %d\n",
+		array_product($part2_results)
 	);
 	
 } catch (Exception $e) {
