@@ -40,11 +40,24 @@ class Vector2d {
 		public int $y
 	) {}
 	
-	public function rotate(Vector2dRotation $rotation) : void {
-		$new_x = Vector2dRotation::RIGHT == $rotation ? -$this->y : $this->y; 
-		$new_y = Vector2dRotation::RIGHT == $rotation ? $this->x : -$this->x;
-		$this->x = $new_x;
-		$this->y = $new_y;
+	public function rotate(Vector2dRotation $rotation, ?Vector2d $origin=null) : void {
+		if(is_null($origin))
+			$origin = new Vector2d(0,0);
+		
+		if($rotation == Vector2dRotation::RIGHT) {
+			$rotation_matrix = [[0, -1], [1, 0]];
+		} else {
+			$rotation_matrix = [[0, 1], [-1, 0]];
+		}
+		
+		$x_translated = $this->x - $origin->x;
+		$y_translated = $this->y - $origin->y;
+		
+		$x_rotated = $rotation_matrix[0][0] * $x_translated + $rotation_matrix[0][1] * $y_translated;
+		$y_rotated = $rotation_matrix[1][0] * $x_translated + $rotation_matrix[1][1] * $y_translated;
+		
+		$this->x = $x_rotated + $origin->x;
+		$this->y = $y_rotated + $origin->y;
 	}
 	
 	public function forward(Vector2d $heading) : Vector2d {
