@@ -2,7 +2,7 @@
 /** @noinspection DuplicatedCode */
 declare(strict_types=1);
 
-namespace AoC\Year2022\Day23\Part1;
+namespace AoC\Year2022\Day23\Part2;
 
 class Vector2d {
 	public function __construct(
@@ -189,7 +189,7 @@ class GridMap {
             echo PHP_EOL;
         }
 
-        usleep(100_000);
+        usleep(25_000);
 //        usleep(50_000);
     }
 	
@@ -245,13 +245,18 @@ $map->findElves();
 
 // [TODO] Move this into a game logic class
 
-$rounds = 1_000;
+$rounds = 1;
 
 $map->renderFrame();
 
-while($rounds--) {
+while($rounds <= 1_000) {
 	$locations = $map->proposeLocations();
-	
+
+    if(!$locations) {
+        printf("Part 2: %d\n", $rounds);
+        break;
+    }
+
 	foreach($locations as $xy => $elves) {
 		//printf("(%s) %d\n", $xy, count($elves));
 		
@@ -269,6 +274,8 @@ while($rounds--) {
 
     $map->renderFrame();
     echo PHP_EOL;
+
+    $rounds++;
 }
 
 $rect = $map->getRectangle($map->getElfBoundingBox());
