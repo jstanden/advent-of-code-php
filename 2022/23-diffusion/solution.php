@@ -1,8 +1,9 @@
 <?php
-/** @noinspection DuplicatedCode */
 declare(strict_types=1);
 
-namespace AoC\Year2022\Day23\Part1;
+namespace AoC\Year2022\Day23\Part2;
+
+const ANIMATE = false;
 
 class Vector2d {
 	public function __construct(
@@ -24,10 +25,6 @@ class Vector2d {
 		$this->y = $vector->y;
         return $this;
 	}
-	
-//	public function toArray() : array {
-//		return [$this->x, $this->y];
-//	}
 }
 
 enum ProposedDirection : string {
@@ -95,7 +92,6 @@ class Elf {
 	}
 }
 
-// [TODO] renderFrame method for animation
 class GridMap {
 	public array $grid = [];
 	public array $extents = [];
@@ -109,6 +105,7 @@ class GridMap {
 	
 	public function __construct(array $data) {
 		$this->_loadData($data);
+		$this->findElves();
 	}
 	
 	private function _loadData(array $data): void {
@@ -189,8 +186,7 @@ class GridMap {
             echo PHP_EOL;
         }
 
-        usleep(100_000);
-//        usleep(50_000);
+        usleep(25_000);
     }
 	
 	/** @return Elf[] */
@@ -236,21 +232,24 @@ class GridMap {
 	}
 }
 
-//$data = explode("\n", file_get_contents("test.txt"));
 $data = explode("\n", file_get_contents("data.txt"));
 
 $map = new GridMap($data);
 
-$map->findElves();
+$rounds = 1;
 
-// [TODO] Move this into a game logic class
+if(ANIMATE)
+	$map->renderFrame();
 
-$rounds = 1_000;
+$part1 = $part2 = null;
 
-$map->renderFrame();
-
-while($rounds--) {
+while($rounds <= 2_500) {
 	$locations = $map->proposeLocations();
+
+	if(!$locations) {
+			$part2 = $rounds;
+			break;
+	}
 	
 	foreach($locations as $xy => $elves) {
 		//printf("(%s) %d\n", $xy, count($elves));
@@ -266,13 +265,28 @@ while($rounds--) {
 			$map->grid[$elf->location->x][$elf->location->y] = '#';
 		}
 	}
+	
+	if($rounds == 10) {
+		$rect = $map->getRectangle($map->getElfBoundingBox());
+		$part1 = count(array_filter(array_merge(...$rect), fn($tile) => $tile == '.'));
+	}
 
-    $map->renderFrame();
-    echo PHP_EOL;
+	if(ANIMATE) {
+		$map->renderFrame();
+		echo PHP_EOL;
+	}
+
+	$rounds++;
 }
 
-$rect = $map->getRectangle($map->getElfBoundingBox());
+if(ANIMATE) {
+	$rect = $map->getRectangle($map->getElfBoundingBox());
+	$map->renderFrame($rect);
+	echo PHP_EOL;
+}
 
-printf("Part 1: %d\n", count(array_filter(array_merge(...$rect), fn($tile) => $tile == '.')));
+//$rect = $map->getRectangle($map->getElfBoundingBox());
+printf("Part 1: %d\n", $part1);
+printf("Part 2: %d\n", $part2);
 
-// 3757
+// 3757 + 918
