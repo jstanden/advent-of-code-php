@@ -23,7 +23,7 @@ class Vector2d {
 	public function set(Vector2d $vector) : Vector2d {
 		$this->x = $vector->x;
 		$this->y = $vector->y;
-        return $this;
+			return $this;
 	}
 }
 
@@ -143,16 +143,16 @@ class GridMap {
 	function getElfBoundingBox() : array {
 		$bounds = [PHP_INT_MAX, PHP_INT_MIN, PHP_INT_MAX, PHP_INT_MIN];
 
-        for($y=$this->extents['y0']; $y<=$this->extents['y1']; $y++) {
-            for($x=$this->extents['x0']; $x<=$this->extents['x1']; $x++) {
-                if('#' != $this->getTile(new Vector2d($x, $y)))
-                    continue;
+		for($y=$this->extents['y0']; $y<=$this->extents['y1']; $y++) {
+			for($x=$this->extents['x0']; $x<=$this->extents['x1']; $x++) {
+				if('#' != $this->getTile(new Vector2d($x, $y)))
+					continue;
 
-                $bounds[0] = min($bounds[0], $x);
-                $bounds[1] = max($bounds[1], $x);
-                $bounds[2] = min($bounds[2], $y);
-                $bounds[3] = max($bounds[3], $y);
-            }
+				$bounds[0] = min($bounds[0], $x);
+				$bounds[1] = max($bounds[1], $x);
+				$bounds[2] = min($bounds[2], $y);
+				$bounds[3] = max($bounds[3], $y);
+			}
 		}
 		
 		return $bounds;
@@ -164,30 +164,30 @@ class GridMap {
 		
 		$rectangle = [];
 		
-        for($y=$bounds[2]; $y<=$bounds[3]; $y++) {
-		    for($x=$bounds[0]; $x<=$bounds[1]; $x++) {
+		for($y=$bounds[2]; $y<=$bounds[3]; $y++) {
+			for($x=$bounds[0]; $x<=$bounds[1]; $x++) {
 				$rectangle[$x][$y] = $this->grid[$x][$y] ?? '.';
 			}
 		}
 		
 		return $rectangle;
 	}
-
-    function renderFrame(array $bounds=[]) : void {
-        echo "\e[H\e[J"; // cls
-
-        if(!$bounds)
-            $bounds = array_values($this->extents);
-
-        for($y=$bounds[2]; $y<=$bounds[3]; $y++) {
-            for($x=$bounds[0]; $x<=$bounds[1]; $x++) {
-                echo $this->grid[$x][$y] ?? '.';
-            }
-            echo PHP_EOL;
-        }
-
-        usleep(25_000);
-    }
+	
+	function renderFrame(array $bounds = []): void {
+		echo "\e[H\e[J"; // cls
+		
+		if (!$bounds)
+			$bounds = array_values($this->extents);
+		
+		for ($y = $bounds[2]; $y <= $bounds[3]; $y++) {
+			for ($x = $bounds[0]; $x <= $bounds[1]; $x++) {
+				echo $this->grid[$x][$y] ?? '.';
+			}
+			echo PHP_EOL;
+		}
+		
+		usleep(25_000);
+	}
 	
 	/** @return Elf[] */
 	function findElves() : array {
