@@ -6,4 +6,4 @@ array_walk_recursive($json, function($n) use (&$numbers) {
 	if(is_int($n)) $numbers[] = $n;
 });
 
-printf("Part 1: %d\n", array_sum($numbers));
+printf("Part 1: %d\n", array_sum($numbers)); // 119433
