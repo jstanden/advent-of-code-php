@@ -1,0 +1,10 @@
+{
+  "name": "jstanden/advent-of-code-php",
+  "require": {
+  },
+  "autoload": {
+    "psr-4": {
+      "jstanden\\AoC\\": "src/"
+    }
+  }
+}
