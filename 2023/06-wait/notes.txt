@@ -1,0 +1,38 @@
+// Original naive DFS approach
+$stack = new \SplStack();
+$winning_combos = 0;
+
+// Initial race state
+$stack->push([
+    'hold' => true, // are we holding the button?
+    'speed' => 0, // current speed
+    't_left' => (int)$times[$i], // time left
+    'd' => 0, // distance traveled
+    'd_record' => (int)$distances[$i] // distance record to beat
+]);
+
+while (!$stack->isEmpty()) {
+    $state = $stack->pop();
+
+    // If we're out of time, check our distance traveled vs record
+    if (!$state['t_left']) {
+        if ($state['d'] > $state['d_record']) $winning_combos++;
+
+    // Otherwise, simulate binary outcome (hold vs move)
+    } else {
+        // Branch to simulate holding the button from this (t)ime
+        if ($state['hold']) {
+            $hold = $state;
+            $hold['t_left']--;
+            $hold['speed']++;
+            $stack->push($hold);
+        }
+
+        // Branch to simulate moving from this (t)ime
+        $move = $state;
+        $move['hold'] = false;
+        $move['d'] += ($move['speed'] * $move['t_left']); // finish moving
+        $move['t_left'] = 0;
+        $stack->push($move);
+    }
+}
