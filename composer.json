@@ -1,6 +1,7 @@
 {
   "name": "jstanden/advent-of-code-php",
   "require": {
+    "markrogoyski/math-php": "^2.8"
   },
   "autoload": {
     "psr-4": {

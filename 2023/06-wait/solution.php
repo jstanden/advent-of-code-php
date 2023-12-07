@@ -3,7 +3,8 @@
 
 namespace AoC\Year2023\Day6;
 
-use jstanden\AoC\Library\Math\Quadratic;
+use MathPHP\Algebra;
+use MathPHP\Exception\IncorrectTypeException;
 
 require_once('../../vendor/autoload.php');
 
@@ -15,9 +16,12 @@ function race(array $times, $distances) : array {
 	foreach (array_keys($times) as $i) {
 		// let w=wait, t=time(max), d=dist(max)
 		// 1w² - tw + d = 0
-		$bounds = Quadratic::getBounds(a: 1, b: -$times[$i], c: $distances[$i]);
+		try {
+			$roots = Algebra::quadratic(a: 1, b: -$times[$i], c: $distances[$i]);
+		} catch (IncorrectTypeException) { continue; }
+		
 		// We need to beat the previous dist(max) record
-		$winning_combos = (ceil($bounds['upper']-1) - floor($bounds['lower']+1)+1);
+		$winning_combos = (ceil($roots[1]-1) - floor($roots[0]+1)+1);
 
 		// If this is a winning combo, add to the score (part 1)
 		if($winning_combos)
