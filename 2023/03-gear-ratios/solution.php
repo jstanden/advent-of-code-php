@@ -49,7 +49,7 @@ class Schematic extends GridMap2d {
 	function hasNeighborsExcluding(Vector2d $loc, array $exclusions) : bool {
 		// Check the eight cardinal directions from our vector
 		return (bool) array_filter(
-			$this->getAdjacentNeighbors($loc),
+			$this->getEightNeighbors($loc),
 			// Exclude neighbors with a forbidden tile/symbol
 			fn($vector) => !in_array($this->getTile($vector), $exclusions)
 		);

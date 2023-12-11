@@ -13,7 +13,7 @@ enum Vector2dDirection: string
     case SOUTH = 'south';
     case SOUTHEAST = 'southeast';
 
-    public function getVector(): Vector2d
+	public function getVector(): Vector2d
     {
         return new Vector2d(...match ($this) {
             self::NORTHWEST => [-1, -1],

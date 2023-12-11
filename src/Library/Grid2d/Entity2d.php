@@ -5,7 +5,7 @@ namespace jstanden\AoC\Library\Grid2d;
 class Entity2d
 {
     function __construct(
-        public string $name, public Vector2d $origin, public int $width, public int $height = 1
+        public string $name, public Vector2d $origin, public int $width = 1, public int $height = 1
     )
     {
     }
