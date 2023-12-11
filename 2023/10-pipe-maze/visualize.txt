@@ -1,0 +1,30 @@
+$map->print(
+	new Bounds2d(new Vector2d(0,0), $map->extents['x1'], $map->extents['y1']),
+	function(Vector2d $v, string $tile) use ($visited, $start, $loop_normals) {
+		if(array_key_exists((string)$v, $visited)) {
+			$tile = match($tile) {
+				'J' => '╝',
+				'F' => '╔',
+				'-' => '═',
+				'|' => '║',
+				'7' => '╗',
+				'L' => '╚',
+				default => $tile,
+			};
+
+			if($v == $start) {
+				echo "\033[38;5;15m\033[48;5;10m" . 'S' . "\033[0m";
+			} else if ($loop_normals[(string)$v] ?? null) {
+				echo "\033[38;5;10m" . $tile . "\033[0m";
+			} else {
+				echo "\033[37m" . $tile . "\033[0m";
+			}
+		} else {
+			if ($loop_normals[(string)$v] ?? null) {
+				echo "\033[38;5;10m" . $tile . "\033[0m";
+			} else {
+				echo "\033[2m" . $tile . "\033[0m";
+			}
+		}
+	}
+);
