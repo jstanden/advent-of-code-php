@@ -14,14 +14,18 @@ class Combinations {
 		}
 	}
 	
-	static function pairs(array $values) : array
+	static function pairs(array $values, $preserve_keys=false) : array
 	{
 		$combinations = [];
 		$length = count($values);
 		
 		for ($i = 0; $i < $length; $i++) {
 			for ($j = $i + 1; $j < $length; $j++) {
-				$combinations[] = [$values[$i], $values[$j]];
+				if($preserve_keys) {
+					$combinations[] = [$i => $values[$i], $j => $values[$j]];
+				} else {
+					$combinations[] = [$values[$i], $values[$j]];
+				}
 			}
 		}
 		
