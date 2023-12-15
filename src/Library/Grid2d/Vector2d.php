@@ -17,15 +17,23 @@ class Vector2d
 		return sprintf("%d,%d", $this->x, $this->y);
 	}
 
-	static function add(Vector2d $a, Vector2d $b): Vector2d {
+	static function add(Vector2d $a, Vector2d $b): Vector2d
+	{
         return new Vector2d($a->x + $b->x, $a->y + $b->y);
     }
 
-	static function subtract(Vector2d $a, Vector2d $b): Vector2d {
+	static function subtract(Vector2d $a, Vector2d $b): Vector2d
+	{
         return new Vector2d($a->x - $b->x, $a->y - $b->y);
     }
 
-    public function toString(): string {
+	function multiply(Vector2d $b) : Vector2d
+	{
+        return new Vector2d($this->x * $b->x, $this->y * $b->y);
+	}
+
+	public function toString(): string
+	{
         return sprintf('%d,%d', $this->x, $this->y);
     }
 

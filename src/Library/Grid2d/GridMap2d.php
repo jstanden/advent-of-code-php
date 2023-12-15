@@ -156,7 +156,7 @@ class GridMap2d
 		$v = clone $bounds->origin;
 		for($y=$bounds->origin->y;$y<=$bounds->origin->y+$bounds->height;$y++) {
 			for($x=$bounds->origin->x;$x<=$bounds->origin->x+$bounds->width;$x++) {
-				$tile = $this->getTile($v->set($x, $y));
+				$tile = $this->getTile($v->set($x, $y)) ?? '';
 				if($callback) {
 					$callback($v, $tile);
 				}
@@ -181,5 +181,21 @@ class GridMap2d
 			}
 			echo PHP_EOL;
 		}
+	}
+
+	public function moveEntity(Entity2d $entity, Vector2d $to, string $replace_with='.')
+	{
+		$tile = $this->getTile($entity->origin);
+		$this->setTile($entity->origin, $replace_with);
+		$entity->origin->set($to->x, $to->y);
+		$this->setTile($to, $tile);
+	}
+
+	private function clamp(Vector2d $v) : Vector2d
+	{
+		$new_v = clone $v;
+		$new_v->x = min(max($new_v->x, $this->extents['x0']), $this->extents['x1']);
+		$new_v->y = min(max($new_v->y, $this->extents['y0']), $this->extents['y1']);
+		return $new_v;
 	}
 }
