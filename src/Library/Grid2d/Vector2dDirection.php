@@ -26,4 +26,21 @@ enum Vector2dDirection: string
             self::SOUTHEAST => [1, 1],
         });
     }
+
+	public function fromVector(Vector2d $vector): Vector2dDirection {
+		return match($vector->toString()) {
+			'-1,-1' => self::NORTHWEST,
+			'0,-1' => self::NORTH,
+			'1,-1' => self::NORTHEAST,
+			'-1,0' => self::WEST,
+			'1,0' => self::EAST,
+			'-1,1' => self::SOUTHWEST,
+			'0,1' => self::SOUTH,
+			'1,1' => self::SOUTHEAST,
+		};
+	}
+
+	public function rotate(Vector2dRotation $rotation): Vector2dDirection {
+		return $this->fromVector($this->getVector()->rotate($rotation));
+	}
 }
