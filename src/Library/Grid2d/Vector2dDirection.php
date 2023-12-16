@@ -43,4 +43,21 @@ enum Vector2dDirection: string
 	public function rotate(Vector2dRotation $rotation): Vector2dDirection {
 		return $this->fromVector($this->getVector()->rotate($rotation));
 	}
+
+	public function isVertical() : bool {
+		return in_array($this, [Vector2dDirection::NORTH, Vector2dDirection::SOUTH]);
+	}
+
+	public function isHorizontal() : bool {
+		return in_array($this, [Vector2dDirection::EAST, Vector2dDirection::WEST]);
+	}
+
+	public function isDiagonal() : bool {
+		return in_array($this, [
+			Vector2dDirection::NORTHWEST,
+			Vector2dDirection::NORTHEAST,
+			Vector2dDirection::SOUTHWEST,
+			Vector2dDirection::SOUTHEAST,
+		]);
+	}
 }
