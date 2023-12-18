@@ -22,17 +22,19 @@ class GridMap2d
             'x0' => 0,
             'x1' => array_reduce($data, fn($carry, $row) => max($carry, strlen($row) - 1), 0),
             'y0' => 0,
-            'y1' => count($data) - 1,
+            'y1' => max(0, count($data) - 1),
         ];
 
         // Convert row strings to character arrays and pad all to the widest
         $data = array_map(fn($row) => str_split($row), $data);
 
         // Flip to an X,Y grid
-        $this->grid = array_combine(
-            array_keys($data[0]),
-            array_values(array_map(fn($col) => array_column($data, $col), array_keys($data[0])))
-        );
+		if($data[0] ?? []) {
+			$this->grid = array_combine(
+				array_keys($data[0]),
+				array_values(array_map(fn($col) => array_column($data, $col), array_keys($data[0])))
+			);
+		}
     }
 
     function euclideanDistance(Vector2d $a, Vector2d $b): float
