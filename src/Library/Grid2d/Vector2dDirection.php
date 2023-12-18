@@ -39,6 +39,16 @@ enum Vector2dDirection: string
 			'1,1' => self::SOUTHEAST,
 		};
 	}
+	
+	public static function between(mixed $from, mixed $to) : Vector2dDirection
+	{
+		return match(true) {
+			$to->x > $from->x => self::EAST,
+			$to->x < $from->x => self::WEST,
+			$to->y > $from->y => self::NORTH,
+			default => self::SOUTH,
+		};
+	}
 
 	public function rotate(Vector2dRotation $rotation): Vector2dDirection {
 		return $this->fromVector($this->getVector()->rotate($rotation));
