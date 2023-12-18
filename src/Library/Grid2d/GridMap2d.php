@@ -45,7 +45,7 @@ class GridMap2d
         );
     }
 	
-	function manhattanDistance(Vector2d $a, Vector2d $b) : int
+	function manhattanDistance(Vector2d $a, Vector2d $b) : float
 	{
 		return abs($a->x - $b->x) + abs($a->y - $b->y);
 	}

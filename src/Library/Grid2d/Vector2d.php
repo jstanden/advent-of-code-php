@@ -8,13 +8,13 @@ namespace jstanden\AoC\Library\Grid2d;
 class Vector2d
 {
     public function __construct(
-        public int $x,
-        public int $y
+        public float $x,
+        public float $y
     ) {}
 
 	public function __toString(): string
 	{
-		return sprintf("%d,%d", $this->x, $this->y);
+		return sprintf("%g,%0g", $this->x, $this->y);
 	}
 
 	static function add(Vector2d $a, Vector2d $b): Vector2d
@@ -34,10 +34,10 @@ class Vector2d
 
 	public function toString(): string
 	{
-        return sprintf('%d,%d', $this->x, $this->y);
+        return sprintf('%g,%g', $this->x, $this->y);
     }
 
-	public function set(int $x, int $y) : Vector2d
+	public function set(float $x, float $y) : Vector2d
 	{
 		$this->x = $x;
 		$this->y = $y;
