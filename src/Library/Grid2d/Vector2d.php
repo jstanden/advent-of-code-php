@@ -51,8 +51,10 @@ class Vector2d
 
 		if($rotation == Vector2dRotation::RIGHT) {
 			$rotation_matrix = [[0, -1], [1, 0]];
-		} else {
+		} else if($rotation == Vector2dRotation::LEFT) {
 			$rotation_matrix = [[0, 1], [-1, 0]];
+		} else {
+			$rotation_matrix = [[-1, 0], [0, -1]];
 		}
 
 		$x_translated = $this->x - $origin->x;

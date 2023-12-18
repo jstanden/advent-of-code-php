@@ -5,4 +5,5 @@ namespace jstanden\AoC\Library\Grid2d;
 enum Vector2dRotation : string {
 	case LEFT = 'L';
 	case RIGHT = 'R';
+	case FLIP = 'F';
 }
