@@ -4,7 +4,7 @@
 
 namespace AoC\Year2023\Day8;
 
-use MathPHP\Algebra;
+use jstanden\AoC\Library\Math\Math;
 
 require_once('../../vendor/autoload.php');
 
@@ -103,19 +103,7 @@ If we multiply the LCM of those primes by the path length, we get our answer:
 lcm(43,47,59,61,73,79) * 269 == 11,283,670,395,017
 */
 
-// A quick wrapper to compute the lowest common multiple of (n>2) integers
-function lcm(array $numbers) : ?int {
-	// We can only compute lcm on 2+ integers
-	if(count($numbers) < 2) return null;
-	// Start with our first number
-	$lcm = current($numbers);
-	// Find the new lcm for each subsequent number
-	foreach(array_slice($numbers,1) as $n)
-		$lcm = Algebra::lcm($lcm, $n);
-	return $lcm;
-}
-
 // Part 2: 11283670395017
 echo sprintf("Part 2: %d\n",
-	$path_length * lcm(array_map(fn($at) => current($at)/$path_length, $segment_steps))
+	$path_length * Math::lcm(array_map(fn($at) => current($at)/$path_length, $segment_steps))
 );
