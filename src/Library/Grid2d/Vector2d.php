@@ -16,7 +16,12 @@ class Vector2d
 	{
 		return sprintf("%g,%0g", $this->x, $this->y);
 	}
-
+	
+	public function equals(Vector2d $other) : bool
+	{
+		return $this->x == $other->x && $this->y == $other->y;
+	}
+	
 	static function add(Vector2d $a, Vector2d $b): Vector2d
 	{
         return new Vector2d($a->x + $b->x, $a->y + $b->y);
