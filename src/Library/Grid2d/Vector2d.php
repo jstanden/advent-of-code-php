@@ -14,7 +14,7 @@ class Vector2d
 
 	public function __toString(): string
 	{
-		return sprintf("%g,%0g", $this->x, $this->y);
+		return sprintf("%g,%g", $this->x, $this->y);
 	}
 	
 	public function equals(Vector2d $other) : bool
@@ -36,11 +36,6 @@ class Vector2d
 	{
         return new Vector2d($this->x * $b->x, $this->y * $b->y);
 	}
-
-	public function toString(): string
-	{
-        return sprintf('%g,%g', $this->x, $this->y);
-    }
 
 	public function set(float $x, float $y) : Vector2d
 	{

@@ -28,7 +28,7 @@ enum Vector2dDirection: string
     }
 
 	public function fromVector(Vector2d $vector): Vector2dDirection {
-		return match($vector->toString()) {
+		return match((string)$vector) {
 			'-1,-1' => self::NORTHWEST,
 			'0,-1' => self::NORTH,
 			'1,-1' => self::NORTHEAST,
