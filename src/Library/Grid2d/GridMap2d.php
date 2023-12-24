@@ -153,8 +153,11 @@ class GridMap2d
 		return $results;
 	}
 	
-	public function fill(Bounds2d $bounds, ?callable $callback=null) : void
+	public function fill(?Bounds2d $bounds=null, ?callable $callback=null) : void
 	{
+		if(is_null($bounds))
+			$bounds = new Bounds2d(new Vector2d(0,0),$this->extents['x1'],$this->extents['y1']);
+		
 		$v = clone $bounds->origin;
 		for($y=$bounds->origin->y;$y<=$bounds->origin->y+$bounds->height;$y++) {
 			for($x=$bounds->origin->x;$x<=$bounds->origin->x+$bounds->width;$x++) {
