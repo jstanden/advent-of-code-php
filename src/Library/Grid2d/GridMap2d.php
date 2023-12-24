@@ -112,12 +112,12 @@ class GridMap2d
 	/**
 	 * @return Entity2d[]
 	 */
-    public function getFourNeighborTiles(Vector2d $vector) : array
+    public function getFourNeighborTiles(Vector2d $vector, array $excluding=['']) : array
     {
         return array_filter(array_map(
             fn($v) => new Entity2d($this->getTile($v) ?? '', $v),
 			self::getFourNeighbors($vector),
-        ), fn($e) => $e->name);
+        ), fn($e) => !in_array($e->name, $excluding));
     }
 
     public function getEightNeighbors(Vector2d $vector) : array
