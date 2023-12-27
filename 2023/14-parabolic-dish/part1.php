@@ -8,7 +8,7 @@ use jstanden\AoC\Library\Grid2d\GridMap2d;
 
 require_once('../../vendor/autoload.php');
 
-$lines = explode("\n", file_get_contents('data.txt'));
+$lines = explode("\n", file_get_contents('../../data/2023/14/data.txt'));
 
 // Load the input data into a 2D grid map
 $grid_map = new GridMap2d($lines);

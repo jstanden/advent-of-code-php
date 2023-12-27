@@ -10,7 +10,7 @@ use jstanden\AoC\Library\Math\Cycles;
 
 require_once('../../vendor/autoload.php');
 
-$lines = explode("\n", file_get_contents('data.txt'));
+$lines = explode("\n", file_get_contents('../../data/2023/14/data.txt'));
 
 // Build a 2D map from the input
 $grid_map = new GridMap2d($lines);
