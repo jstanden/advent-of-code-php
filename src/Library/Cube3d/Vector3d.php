@@ -43,6 +43,15 @@ class Vector3d {
 		return sprintf("%g,%g,%g", $this->x, $this->y, $this->z);
 	}
 	
+	public function getAxis(string $xyz) : float
+	{
+		return match($xyz) {
+			'x' => $this->x,
+			'y' => $this->y,
+			'z' => $this->z,
+		};
+	}
+	
 	public function equals(Vector3d $other) : bool
 	{
 		return $this->x == $other->x && $this->y == $other->y && $this->z == $other->z;
