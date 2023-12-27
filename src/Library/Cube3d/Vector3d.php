@@ -79,4 +79,9 @@ class Vector3d {
 	{
 		return sqrt($this->x**2 + $this->y**2 + $this->z**2);
 	}
+	
+	public function invert() : Vector3d
+	{
+		return new Vector3d(-$this->x, -$this->y, -$this->z);
+	}
 }
