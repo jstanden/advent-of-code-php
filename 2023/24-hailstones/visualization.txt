@@ -1,0 +1,47 @@
+for($t=0; $t <= 20; $t+=0.25) {
+	$im = imagecreate(100,150);
+	$white = imagecolorallocate($im, 255, 255, 255);
+	$black = imagecolorallocate($im, 0, 0, 0);
+	$green = imagecolorallocate($im, 0, 200, 0);
+	$red = imagecolorallocate($im, 200, 0, 0);
+	imagefill($im, 0, 0, $black);
+
+	$rock_direction = $rock->direction->multiply(new Vector3d($t, $t, $t));
+	$rock_to = $rock->origin->add($rock_direction);
+	$rock_color = $green;
+
+	foreach ($hailstones as $hailstone) {
+		$direction = $hailstone->direction->multiply(new Vector3d($t, $t, $t));
+		$to = $hailstone->origin->add($direction);
+
+		/*
+		imageline(
+			$im,
+			(int)$hailstone->origin->x+100,
+			(int)$hailstone->origin->y+100,
+			(int)$to->x+100,
+			(int)$to->y+100,
+			$black
+		);
+		*/
+
+		if($rock_to->equals($to))
+			$rock_color = $red;
+
+		imagesetpixel($im, (int)$to->x + 50, (int)$to->y + 100, $white);
+	}
+
+	//imageline(
+	//	$im,
+	//	(int)$rock->origin->x+100,
+	//	(int)$rock->origin->y+100,
+	//	(int)$to->x+100,
+	//	(int)$to->y+100,
+	//	$green
+	//);
+
+	imagesetpixel($im, (int)$rock_to->x + 50, (int)$rock_to->y + 100, $rock_color);
+
+	$im = imagescale($im, 100*5, 150*5, IMG_NEAREST_NEIGHBOUR);
+	imagepng($im, sprintf('images/out_%04f.png', $t));
+}
