@@ -6,6 +6,15 @@ namespace jstanden\AoC\Library\Math;
 use MathPHP\Algebra;
 
 class Math {
+	static function between(float $n, float $lower, float $upper, $inclusive=true) : bool
+	{
+		if($inclusive) {
+			return $n >= $lower && $n <= $upper;
+		} else {
+			return $n > $lower && $n < $upper;
+		}
+	}
+
 	// Quadratic solution
 	// See: https://github.com/terminalmage/adventofcode/blob/main/2023/day06.py
 	// dist = (time-wait)*wait
