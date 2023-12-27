@@ -5,6 +5,8 @@
 declare(strict_types=1);
 namespace jstanden\AoC\Library\Grid2d;
 
+use jstanden\AoC\Library\Collections\MinPriorityQueue;
+
 class GridMap2d
 {
     public array $grid = [];
@@ -202,5 +204,57 @@ class GridMap2d
 		$new_v->x = min(max($new_v->x, $this->extents['x0']), $this->extents['x1']);
 		$new_v->y = min(max($new_v->y, $this->extents['y0']), $this->extents['y1']);
 		return $new_v;
+	}
+	
+	// A* -- Dijkstra is just h=0
+	public function shortestPath(Vector2d $start, Vector2d $goal, ?callable $neighbors=null, ?callable $cost=null, ?callable $h=null) : array
+	{
+		$cameFrom = [];
+		$distFromStart = [];
+		$visited = [];
+		
+		$queue = new MinPriorityQueue();
+		$queue->insert($start, PHP_INT_MIN);
+		$distFromStart[(string)$start] = 0;
+		
+		if(is_null($neighbors))
+			$neighbors = fn(Vector2d $at, GridMap2d $map) => $map->getFourNeighbors($at);
+		
+		if(is_null($cost))
+			$cost = fn(Vector2d $at, Vector2d $to, GridMap2d $map) => 1;
+		
+		if(is_null($h))
+			$h = fn(Vector2d $at, GridMap2d $map) => 0;
+		
+		while(!$queue->isEmpty()) {
+			$at = $queue->extract(); /** @var $at Vector2d */
+			
+			if($at->equals($goal)) {
+				$parent = $at;
+				$path = [$parent];
+				
+				while(($parent = $cameFrom[(string)$parent] ?? null))
+					array_unshift($path, $parent);
+				
+				return [$distFromStart[(string)$at], $path];
+			}
+			
+			if(array_key_exists((string)$at, $visited))
+				continue;
+			
+			$visited[(string)$at] = true;
+			
+			foreach($neighbors($at, $this) as $n) {
+				$newDist = $distFromStart[(string)$at] + $cost($at, $n, $this) + $h($n, $this);
+				
+				if($newDist < ($distFromStart[(string)$n] ?? PHP_INT_MAX)) {
+					$distFromStart[(string)$n] = $newDist;
+					$cameFrom[(string)$n] = $at;
+					$queue->insert($n, $newDist);
+				}
+			}
+		}
+		
+		return [];
 	}
 }
