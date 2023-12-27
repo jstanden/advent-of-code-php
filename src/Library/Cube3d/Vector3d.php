@@ -56,7 +56,16 @@ class Vector3d {
 			$this->z + $vector->z,
 		);
 	}
-	
+
+	public function multiply(Vector3d $vector) : Vector3d
+	{
+		return new Vector3d(
+			$this->x * $vector->x,
+			$this->y * $vector->y,
+			$this->z * $vector->z,
+		);
+	}
+
 	public function magnitude() : float
 	{
 		return sqrt($this->x**2 + $this->y**2 + $this->z**2);
